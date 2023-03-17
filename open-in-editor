@@ -25,7 +25,7 @@ def main():
         terminal = BaseTerminal.infer_from_environment_variables()
         (url,) = sys.argv[1:]
         path, line, column = parse_url(url)
-        log_debug("path=%s line=%s column=%s" % (path, line, column))
+        log_info("path=%s line=%s column=%s" % (path, line, column))
         if hasattr(editor, 'is_terminal') and\
             editor.is_terminal:
             editor.visit_file(path, line or 1, column or 1, terminal)
@@ -70,7 +70,7 @@ def parse_url(url):  # type: (str) -> (str, Optional[int], Optional[int]):
     return path, line, column
 
 
-def log_error(line):
+def log(line):
     time = datetime.datetime.now().isoformat(" ").split(".")[0]
     with open(LOGFILE, "a") as fp:
         print(time, file=fp)
@@ -78,8 +78,9 @@ def log_error(line):
         print("\n", file=fp)
         fp.flush()
 
-def log_debug(line):
+def log_info(line):
     pass
+log_error = log
 
 def log_error_terminal(TERMINAL):
     log_error(
@@ -215,7 +216,7 @@ class Emacs(BaseEditor):
             "(when (functionp 'pulse-momentary-highlight-one-line)"
             " (let ((pulse-delay 0.05)) (pulse-momentary-highlight-one-line (point) 'highlight)))",
         ]
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call(cmd)
 
 
@@ -224,7 +225,7 @@ class PyCharm(BaseEditor):
     is_terminal = False
     def visit_file(self, path, line, column):
         cmd = [self.executable, "--line", str(line), path]
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call([s.encode("utf-8") for s in cmd])
 
 
@@ -233,7 +234,7 @@ class Sublime(BaseEditor):
     is_terminal = False
     def visit_file(self, path, line, column):
         cmd = [self.executable, "%s:%s:%s" % (path, line, column)]
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call(cmd)
 
 
@@ -242,7 +243,7 @@ class VSCode(BaseEditor):
     is_terminal = False
     def visit_file(self, path, line, column):
         cmd = [self.executable, "-g", "%s:%s:%s" % (path, line, column)]
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call(cmd)
 
 
@@ -255,7 +256,7 @@ class Vim(BaseEditor):
         cmd = terminal.get_args()
         cmd.extend([self.executable, "+%s" % str(line)])
         cmd.extend(["-c", "normal %sl" % str(column - 1), path] if column > 1 else [path])
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call(cmd)
 
 
@@ -267,7 +268,7 @@ class Helix(BaseEditor):
             log_error_terminal(terminal.TERMINAL)
         cmd = terminal.get_args()
         cmd.extend([self.executable, "%s:%s:%s" % (path, line, column)])
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call(cmd)
 
 
@@ -279,7 +280,7 @@ class O(BaseEditor):
             log_error_terminal(terminal.TERMINAL)
         cmd = terminal.get_args()
         cmd.extend([self.executable, path, "+%s" % str(line), "+%s" % str(column)])
-        log_debug(" ".join(cmd))
+        log_info(" ".join(cmd))
         subprocess.check_call(cmd)
 
 
