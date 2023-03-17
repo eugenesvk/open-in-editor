@@ -1,3 +1,5 @@
+(this fork removes the progress bar in the macOS app and and non-error logging)
+
 Open a local file from a URL at a line number in an editor/IDE.
 
 The idea is that you would register this application as a handler for certain URLs in your system.
